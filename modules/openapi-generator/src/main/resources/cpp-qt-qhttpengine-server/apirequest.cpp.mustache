@@ -129,7 +129,7 @@ void {{classname}}Request::{{nickname}}Request({{#hasPathParams}}{{#pathParams}}
 }
 
 {{/operation}}{{/operations}}
-{{#operations}}{{#operation}}void {{classname}}Request::{{nickname}}Error({{#returnType}}const {{{.}}}& res, {{/returnType}}QNetworkReply::NetworkError error_type, QString& error_str){
+{{#operations}}{{#operation}}void {{classname}}Request::{{nickname}}Error({{#returnType}}const {{{.}}}& res, {{/returnType}}QString& error_str, int status_code){
     Q_UNUSED(error_type); // TODO: Remap error_type to QHttpEngine::Socket errors
     setSocketResponseHeaders();{{#returnType}}
     Q_UNUSED(error_str);  // response will be used instead of error string{{#isMap}}
@@ -138,9 +138,9 @@ void {{classname}}Request::{{nickname}}Request({{#hasPathParams}}{{#pathParams}}
     QJsonDocument resDoc(::{{cppNamespace}}::toJsonValue(res).to{{^isArray}}Object{{/isArray}}{{#isArray}}Array{{/isArray}}());
     socket->writeJson(resDoc);{{/vendorExtensions.x-returns-enum}}{{#vendorExtensions.x-returns-enum}}
     socket->write(::{{cppNamespace}}::toStringValue(res).toUtf8());{{/vendorExtensions.x-returns-enum}}{{/returnTypeIsPrimitive}}{{#returnTypeIsPrimitive}}
-    socket->write({{#isArray}}QString("["+{{/isArray}}::{{cppNamespace}}::toStringValue(res){{#isArray}}+"]"){{/isArray}}.toUtf8());{{/returnTypeIsPrimitive}}{{/isMap}}{{/returnType}}{{^returnType}}
-    socket->setStatusCode(QHttpEngine::Socket::NotFound);
-    socket->write(error_str.toUtf8());{{/returnType}}
+    socket->write({{#isArray}}QString("["+{{/isArray}}::{{cppNamespace}}::toStringValue(res){{#isArray}}+"]"){{/isArray}}.toUtf8());{{/returnTypeIsPrimitive}}{{/isMap}}{{/returnType}}
+    socket->setStatusCode(status_code); // test
+    socket->write(error_str.toUtf8());
     if(socket->isOpen()){
         socket->close();
     }
